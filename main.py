@@ -39,6 +39,8 @@ def gainRatio(data, column):
         lst = data.loc[data[column] == i]
         intr_info -= log(lst.shape[0] / data.shape[0]) * lst.shape[0] / data.shape[0]
 
+    if intr_info == 0:
+        return 0.00001
     return gain(data, column) / intr_info
 
 
@@ -49,19 +51,29 @@ def treeGen(data, headers, G, GG):
 
         best = [0, 0]
         for attribute in headers[0:-1]:
+            # if data.shape[0] == 1:
+            #     continue
             tmp = gainRatio(data, attribute)
             if tmp > best[1]:
                 best = [attribute, tmp]
+
+        if best[0] == 0:
+            break
         headers.remove(best[0])
 
         G.add_node(best[0])
         if GG is not None:
-            G.add_edge(GG, best[0])
+            G.add_edge(GG, best[0], label="XfghfgdfghfghD")
 
         st = set(data[best[0]])
         for i in st:
             sub_data = data.loc[data[best[0]] == i]
-            treeGen(sub_data, headers, G, best[0])
+            # if sub_data.shape[0] < 2:
+            #     continue
+            if GG is None:
+                treeGen(sub_data, headers.copy(), G, best[0])
+            else:
+                treeGen(sub_data, headers.copy(), G, str(best[0]) + str(i))
 
     # G = nx.Graph()
     # G.add_node(4)

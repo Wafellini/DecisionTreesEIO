@@ -4,6 +4,7 @@ import networkx as nx
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 def entropy(data, column):
     lst = list(data[column])
     st = set(lst)
@@ -41,23 +42,48 @@ def gainRatio(data, column):
     return gain(data, column) / intr_info
 
 
+def treeGen(data, headers, G, GG):
+    while len(headers) > 1:
+        if len(set(data["Survived"])) == 1:
+            break
+
+        best = [0, 0]
+        for attribute in headers[0:-1]:
+            tmp = gainRatio(data, attribute)
+            if tmp > best[1]:
+                best = [attribute, tmp]
+        headers.remove(best[0])
+
+        G.add_node(best[0])
+        if GG is not None:
+            G.add_edge(GG, best[0])
+
+        st = set(data[best[0]])
+        for i in st:
+            sub_data = data.loc[data[best[0]] == i]
+            treeGen(sub_data, headers, G, best[0])
+
+    # G = nx.Graph()
+    # G.add_node(4)
+    # G.add_edge(1, 2)  # default edge data=1
+    # G.add_edge(2, 3, weight=0.1)  # specify edge data
+    #
+    # nx.draw(G, with_labels=True, font_weight='bold')
+    #
+    # plt.show()
+
+
 if __name__ == '__main__':
     file = "titanic-homework.csv"
-    data = pd.read_csv(file)
-    column = 'Pclass'
+    datat = pd.read_csv(file)
+    columnn = 'Pclass'
 
     # print(entropy(data, column))
-    conditionalEntropy(data, column)
-    print(gain(data, column))
-
-def treeGen():
+    # conditionalEntropy(data, column)
+    # print(gain(data, column))
     G = nx.Graph()
-    G.add_edge(1, 2)  # default edge data=1
-    G.add_edge(2, 3, weight=0.1)  # specify edge data
-
-
+    GG = None
+    treeGen(datat, list(datat.columns.values), G, GG)
     nx.draw(G, with_labels=True, font_weight='bold')
 
-
     plt.show()
-treeGen()

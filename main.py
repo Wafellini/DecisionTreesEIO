@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # print(entropy(data, column))
     # conditionalEntropy(data, column)
     # print(gain(data, column))
-    G = nx.Graph()
+    G = nx.DiGraph()
     GG = None
     treeGen(datat, list(datat.columns.values), G, GG)
     nx.draw(G, with_labels=True, font_weight='bold')

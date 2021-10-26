@@ -1,3 +1,4 @@
+import random
 from math import log
 
 import networkx as nx
@@ -44,59 +45,46 @@ def gainRatio(data, column):
     return gain(data, column) / intr_info
 
 
-def treeGen(data, headers, G, GG):
-    while len(headers) > 1:
-        if len(set(data["Survived"])) == 1:
-            break
+def treeGen(data, headers, G, prev_node, prev_choice):
 
-        best = [0, 0]
-        for attribute in headers[0:-1]:
-            # if data.shape[0] == 1:
-            #     continue
-            tmp = gainRatio(data, attribute)
-            if tmp > best[1]:
-                best = [attribute, tmp]
+    if len(set(data["Survived"])) == 1:
+        return
 
-        if best[0] == 0:
-            break
-        headers.remove(best[0])
+    best = [0, 0]
+    for attribute in headers[0:-1]:
+        # if data.shape[0] == 1:
+        #     continue
+        tmp = gainRatio(data, attribute)
+        if tmp > best[1]:
+            best = [attribute, tmp]
 
-        G.add_node(best[0])
-        if GG is not None:
-            G.add_edge(GG, best[0], label="XfghfgdfghfghD")
+    if best[0] == 0:
+        return
+    headers.remove(best[0])
 
-        st = set(data[best[0]])
-        for i in st:
-            sub_data = data.loc[data[best[0]] == i]
-            # if sub_data.shape[0] < 2:
-            #     continue
-            if GG is None:
-                treeGen(sub_data, headers.copy(), G, best[0])
-            else:
-                treeGen(sub_data, headers.copy(), G, str(best[0]) + str(i))
 
-    # G = nx.Graph()
-    # G.add_node(4)
-    # G.add_edge(1, 2)  # default edge data=1
-    # G.add_edge(2, 3, weight=0.1)  # specify edge data
-    #
-    # nx.draw(G, with_labels=True, font_weight='bold')
-    #
-    # plt.show()
+    if prev_node is not None:
+        node = prev_choice + str(best[0]) + str(random.randint(1, 1000000))
+        G.add_edge(prev_node, node, weight=1, label='I')
+
+    st = set(data[best[0]])
+    for i in st:
+        sub_data = data.loc[data[best[0]] == i]
+        # if sub_data.shape[0] < 2:
+        #     continue
+        if prev_node is None:
+            treeGen(sub_data, headers.copy(), G, str(best[0]), str(i))
+        else:
+            treeGen(sub_data, headers.copy(), G, node, str(i))
+
 
 
 def normalizeData(data):
     headerss = list(datat.columns.values)
     headerss.remove("PassengerId")
 
-    # for row in data.iterrows():
-    #     XD = row["Age"]
-    #     print(row["Age"])
-        # print(row["Age"])
-    data["Age"] = [("Young" if i <= 20 else "Middle" if i > 20 & i <= 40 else "Old" if i > 40 else "Bruh") for i in data["Age"]]
-    # data.loc[data["Age"] <= 20] = 20
-    # data.loc[data["Age"] > 20 & data["Age"] <= 40] = 40
-    # data.loc[40 < data["Age"]] = 60
+    data["Age"] = [("Young" if i <= 20 else "Middle" if i > 20 & i <= 40 else "Old" if i > 40 else "Bruh") for i in
+                   data["Age"]]
 
     return data, headerss
 
@@ -110,10 +98,10 @@ if __name__ == '__main__':
     # conditionalEntropy(data, column)
     # print(gain(data, column))
     G = nx.DiGraph()
-    GG = None
+    prev_node = None
     datat, headers = normalizeData(datat)
     # headers.remove("PassengerId")
-    treeGen(datat, headers, G, GG)
+    treeGen(datat, headers, G, prev_node, None)
     nx.draw(G, with_labels=True, font_weight='bold')
 
     plt.show()

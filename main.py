@@ -85,6 +85,22 @@ def treeGen(data, headers, G, GG):
     # plt.show()
 
 
+def normalizeData(data):
+    headerss = list(datat.columns.values)
+    headerss.remove("PassengerId")
+
+    # for row in data.iterrows():
+    #     XD = row["Age"]
+    #     print(row["Age"])
+        # print(row["Age"])
+    data["Age"] = [("Young" if i <= 20 else "Middle" if i > 20 & i <= 40 else "Old" if i > 40 else "Bruh") for i in data["Age"]]
+    # data.loc[data["Age"] <= 20] = 20
+    # data.loc[data["Age"] > 20 & data["Age"] <= 40] = 40
+    # data.loc[40 < data["Age"]] = 60
+
+    return data, headerss
+
+
 if __name__ == '__main__':
     file = "titanic-homework.csv"
     datat = pd.read_csv(file)
@@ -95,7 +111,9 @@ if __name__ == '__main__':
     # print(gain(data, column))
     G = nx.DiGraph()
     GG = None
-    treeGen(datat, list(datat.columns.values), G, GG)
+    datat, headers = normalizeData(datat)
+    # headers.remove("PassengerId")
+    treeGen(datat, headers, G, GG)
     nx.draw(G, with_labels=True, font_weight='bold')
 
     plt.show()

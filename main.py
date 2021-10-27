@@ -15,25 +15,34 @@ def entropy(data, column):
     for i in st:
         entrpy -= log2(lst.count(i) / len(lst)) * lst.count(i) / len(lst)
 
+    print("Entropy - " + f": {entrpy}")
     return entrpy
 
 
 def conditionalEntropy(data, column):
+    print("Conditional Entropy - " + column)
     st = set(data[column])
 
     con_entr = 0
     for i in st:
+        print(f"   {i}")
         classs = data.loc[data[column] == i]
         con_entr += entropy(classs, "Survived") * classs.shape[0] / data.shape[0]
 
+    print("Conditional Entropy - " + column+ f": {con_entr}")
     return con_entr
 
 
 def gain(data, column):
-    return entropy(data, "Survived") - conditionalEntropy(data, column)
+    print("Gain for " + column)
+    gin = entropy(data, "Survived") - conditionalEntropy(data, column)
+    print("Gain - " + column + f": {gin}")
+    return gin
 
 
 def gainRatio(data, column):
+    print('===================================')
+    print("Gain Ratio for " + column)
     st = set(data[column])
 
     intr_info = 0
@@ -43,7 +52,9 @@ def gainRatio(data, column):
 
     if intr_info == 0:
         return 0.00001
-    return gain(data, column) / intr_info
+    gr = gain(data, column) / intr_info
+    print("Gain Ratio - " + column + f": {gr}")
+    return gr
 
 
 def treeGen(data, headers, G, prev_node, prev_choice):
@@ -56,13 +67,21 @@ def treeGen(data, headers, G, prev_node, prev_choice):
         if tmp > best[1]:
             best = [attribute, tmp]
 
+
     if best[0] == 0:
+
         G.add_edge(prev_node, "Prev choice: " + prev_choice + "\nSurvived: " +
                    str(list(data["Survived"])[0]) + "\n " + str(
             random.randint(1, 1000000)), weight=1,
                    label=prev_choice)
         return
     headers.remove(best[0])
+
+    print("||||||||||||||||||||||||||||||||||||||||||||||")
+    print("||||||||||||||||||||||||||||||||||||||||||||||")
+    print("Chosen attribute - ", best[0])
+    print("||||||||||||||||||||||||||||||||||||||||||||||")
+    print("||||||||||||||||||||||||||||||||||||||||||||||")
 
     if prev_node is not None:
         node = "Prev choice: " + prev_choice + "\nVal: " + str(best[0]) + "\n" + str(random.randint(1, 1000000))
